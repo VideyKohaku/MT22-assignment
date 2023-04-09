@@ -91,7 +91,7 @@ class BinExpr(Expr):
 
 class UnExpr(Expr):
     def __init__(self, op: str, val: Expr):
-        self.op = str
+        self.op = op
         self.val = val
 
     def __str__(self):
