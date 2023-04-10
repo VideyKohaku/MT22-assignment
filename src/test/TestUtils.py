@@ -8,9 +8,13 @@ if not './main/mt22/astgen/' in sys.path:
     sys.path.append('./main/mt22/astgen/')
 if os.path.isdir('../target/main/mt22/parser') and not '../target/main/mt22/parser/' in sys.path:
     sys.path.append('../target/main/mt22/parser/')
+if not "./main/mt22/checker" in sys.path:
+    sys.path.append("./main/mt22/checker")
 from MT22Lexer import MT22Lexer
 from MT22Parser import MT22Parser
 from ASTGeneration import ASTGeneration
+from StaticChecker import StaticChecker
+from StaticError import StaticError
 from lexererr import *
 import subprocess
 
@@ -19,6 +23,7 @@ TEST_DIR = "./test/testcases/"
 SOL_DIR = "./test/solutions/"
 Lexer = MT22Lexer
 Parser = MT22Parser
+
 
 
 class TestUtil:
@@ -117,6 +122,12 @@ class TestAST:
         TestAST.check(SOL_DIR, inputfile, num)
         dest = open(os.path.join(SOL_DIR, str(num) + ".txt"), "r")
         line = dest.read()
+        if line != expect:
+            print("\n-------------------------\n")
+            print("test file: ", num,"\n")
+            print("input: ",input,'\n')
+            print("expect: ", expect,'\n')
+            print("actual: ",line,'\n')
         return line == expect
 
     @staticmethod
@@ -147,6 +158,12 @@ class TestChecker:
         TestChecker.check(SOL_DIR, asttree, num)
         dest = open(os.path.join(SOL_DIR, str(num) + ".txt"), "r")
         line = dest.read()
+        if line != expect:
+            print("\n-------------------------\n")
+            print("test file: ", num,"\n")
+            print("input: ",input,'\n')
+            print("expect: ", expect,'\n')
+            print("actual: ",line,'\n')
         return line == expect
 
     @staticmethod

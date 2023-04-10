@@ -1,0 +1,3 @@
+
+        a: integer = true;
+        a: float = 1.0;
