@@ -1,0 +1,9 @@
+
+        main: function void(){
+            a: integer;
+            for (a = 1, a < 12, a+1){
+                b = 2;
+            }
+            break;
+        }
+        

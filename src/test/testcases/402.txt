@@ -1,0 +1,4 @@
+
+        d: auto = 2.0;
+        a: integer = c + d;
+        a: float = 1.0;

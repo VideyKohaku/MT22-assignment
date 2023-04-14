@@ -8,6 +8,7 @@ class ASTGenSuite(unittest.TestCase):
         input = """
             main: function void (){
                 arr = b[1,2];
+                ab: integer;
             }
         """
         expect = str(Program([VarDecl("x", IntegerType())]))

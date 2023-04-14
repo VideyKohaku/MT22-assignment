@@ -5,6 +5,7 @@ from AST import *
 class StaticChecker(Visitor):
     def __init__(self, ast):
         self.ast = ast
+        self.loop_stack = []
 
     def check(self):
         return self.visit(self.ast, [])
@@ -14,6 +15,13 @@ class StaticChecker(Visitor):
             if name in scope:
                 scope[name] = typ
                 return typ
+    
+    def _add_loop_stack(self):
+        self.loop_stack += [1]
+
+    def _pop_loop_stack(self):
+        stack_len = len(self.loop_stack)
+        self.loop_stack = self.loop_stack[:stack_len - 1]
 
     def visitIntegerType(self, ast: IntegerType, o): 
         return IntegerType()
@@ -27,6 +35,7 @@ class StaticChecker(Visitor):
     def visitBooleanType(self, ast: BooleanType, o):
         return BooleanType()
 
+    # dimensions: List[int], typ: atomicTyp
     def visitArrayType(self, ast, o):
         pass
 
@@ -44,7 +53,6 @@ class StaticChecker(Visitor):
 
     # explist: List[Expr]
     def visitArrayLit(self, ast: ArrayLit, o):
-        
         for expr in ast.explist:
             exp_type =  self.visit()
 
@@ -56,8 +64,8 @@ class StaticChecker(Visitor):
 
     # BinExpr: #op: str, #left: Expr, #right: Expr
     def visitBinExpr(self, ast: BinExpr, o):
-        right_typ = self.visit(ast.right, o)
         left_typ = self.visit(ast.left, o)
+        right_typ = self.visit(ast.right, o)
         op = ast.op
 
         if op in ["+", "-", "*", "/"]: #IntType() or FloatType()
@@ -143,21 +151,101 @@ class StaticChecker(Visitor):
                 return BooleanType
             raise TypeMismatchInExpression(ast)
                 
-
+    # name: str
     def visitId(self, ast: Id, o): 
-        pass
+        for scope in o:
+            if ast.name in scope:
+                return scope[ast.name]
+            
+        raise Undeclared( Identifier(), ast.name)
 
     def visitArrayCell(self, ast, o): pass
     def visitFuncCall(self, ast, o): pass
 
-    def visitAssignStmt(self, ast, o): pass
-    def visitBlockStmt(self, ast, o): pass
-    def visitIfStmt(self, ast, o): pass
-    def visitForStmt(self, ast, o): pass
-    def visitWhileStmt(self, ast, o): pass
-    def visitDoWhileStmt(self, ast, o): pass
-    def visitBreakStmt(self, ast, o): pass
-    def visitContinueStmt(self, ast, o): pass
+    # lhs: LHS, rhs: Expr
+    def visitAssignStmt(self, ast: AssignStmt, o): 
+        rhs_typ = self.visit(ast.rhs, o)
+        lhs_typ = self.visit(ast.lhs, o)
+
+        # in var: AutoType() already infered in decl
+        if type(lhs_typ) is FloatType and type(rhs_typ) in [IntegerType, FloatType]:
+            return FloatType()
+        if type(rhs_typ) is not type(lhs_typ):
+            raise TypeMismatchInStatement(ast)
+        
+        return rhs_typ
+
+    # body: List[Stmt or VarDecl]
+    def visitBlockStmt(self, ast, o):
+        env = [{}] + o
+
+        for body_line in ast.body:
+            self.visit(body_line, env)
+
+
+    # cond: Expr, tstmt: Stmt, fstmt: Stmt or None = None
+    def visitIfStmt(self, ast: IfStmt, o):
+        cond_type = self.visit(ast.cond, o)
+        if type(cond_type) is not BooleanType:
+            raise TypeMismatchInStatement(ast)
+        
+        self.visit(ast.tstmt)
+
+        if type(ast.fstmt) is not None:
+            self.visit(ast.fstmt)
+
+    # init: AssignStmt, cond: Expr, upd: Expr, stmt: Stmt
+    def visitForStmt(self, ast: ForStmt, o):
+        StaticChecker._add_loop_stack()
+
+        init_typ = self.visit(ast.init, o)
+        if type(init_typ) is not IntegerType:
+            raise TypeMismatchInStatement(ast)
+
+        cond_typ = self.visit(ast.cond, o)
+        if type(cond_typ) is not BooleanType:
+            raise TypeMismatchInStatement(ast)
+        
+        upd_typ = self.visit(ast.upd, o)
+        if type(upd_typ) is not IntegerType:
+            raise TypeMismatchInStatement(ast)
+
+        self.visit(ast.stmt, o)
+
+        StaticChecker._pop_loop_stack()
+
+    #cond: Expr, stmt: Stmt
+    def visitWhileStmt(self, ast: WhileStmt, o):
+        StaticChecker._add_loop_stack()
+
+        cond_typ = self.visit(ast.cond, o)
+        if type(cond_typ) is not BooleanType:
+            raise TypeMismatchInStatement(ast)
+        
+        self.visit(ast.stmt, o)
+
+        StaticChecker._pop_loop_stack()
+
+
+    # cond: Expr, stmt: BlockStmt
+    def visitDoWhileStmt(self, ast: DoWhileStmt, o):
+        StaticChecker._add_loop_stack()
+
+        cond_typ = self.visit(ast.cond, o)
+        if type(cond_typ) is not BooleanType:
+            raise TypeMismatchInStatement(ast)
+        self.visit(ast.stmt)
+
+        StaticChecker._pop_loop_stack()
+
+    def visitBreakStmt(self, ast: BreakStmt, o):
+        if len(self.loop_stack) in [0]:
+            raise MustInLoop(ast)
+
+    def visitContinueStmt(self, ast, o):
+        if len(self.loop_stack) in [0]:
+            raise MustInLoop(ast)
+
     def visitReturnStmt(self, ast, o): pass
     def visitCallStmt(self, ast, o): pass
 
@@ -172,22 +260,16 @@ class StaticChecker(Visitor):
     def visitVarDecl(self, ast: VarDecl, o):
         # check duplicated name___________
         if ast.name in o[0]:
-            print("visitVarDecl scope: ", o[0])
-            raise Redeclared(Variable(), ast.name)
-
-        # checkType is Void_______________
-        if type(ast.typ) is VoidType:
-            raise TypeMismatchInVarDecl(ast)                    
+            # print("visitVarDecl scope: ", o[0])
+            raise Redeclared(Variable(), ast.name)                 
              
         # checkType Mismatch______________
         if ast.init is not None:
             init_typ = self.visit(ast.init, o) # Type()
             # print(ast.name,": ",type(ast.typ) is AutoType)
             if type(ast.typ) is AutoType:
-                print("before: ",ast.name,": ", ast.typ)
                 # StaticChecker._inferType(o, ast.name, init_typ)
                 ast.typ = init_typ
-                print("after: ", ast.name,": ", ast.typ)
             elif not StaticChecker._check_Float_Int_coersion(ast.typ, init_typ):
                 raise TypeMismatchInVarDecl(ast)      
         elif type(ast.typ) is AutoType:
@@ -201,9 +283,10 @@ class StaticChecker(Visitor):
         pass 
 
     ### Func # name: str, return_type: Type, params: List[oDecl], inherit: str or None, body: BlockStmt
-    def visitFuncDecl(self, ast, o): pass
+    def visitFuncDecl(self, ast, o):
+        pass
 
-    ### Program # decla: List[Decl]
+    ### Program # decls: List[Decl]
     def visitProgram(self, ast: Program, o):
         o = [{}]
         for decl in ast.decls:
