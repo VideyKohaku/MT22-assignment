@@ -5,7 +5,11 @@ from AST import *
 
 class ASTGenSuite(unittest.TestCase):
     def test_short_vardecl(self):
-        input = """x: integer;"""
+        input = """
+            main: function void (){
+                arr = b[1,2];
+            }
+        """
         expect = str(Program([VarDecl("x", IntegerType())]))
         self.assertTrue(TestAST.test(input, expect, 300))
 

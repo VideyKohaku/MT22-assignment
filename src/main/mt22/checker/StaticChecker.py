@@ -8,6 +8,12 @@ class StaticChecker(Visitor):
 
     def check(self):
         return self.visit(self.ast, [])
+    
+    def _inferType(env, name, typ): 
+        for scope in env:
+            if name in scope:
+                scope[name] = typ
+                return typ
 
     def visitIntegerType(self, ast: IntegerType, o): 
         return IntegerType()
@@ -50,16 +56,97 @@ class StaticChecker(Visitor):
 
     # BinExpr: #op: str, #left: Expr, #right: Expr
     def visitBinExpr(self, ast: BinExpr, o):
-        right_typ = self.visit(ast.right)
-        left_typ = self.visit(ast.left)
+        right_typ = self.visit(ast.right, o)
+        left_typ = self.visit(ast.left, o)
         op = ast.op
 
-        if op in ["+", "-", "*", "/"]:
-            # if type(right_typ) is :
+        if op in ["+", "-", "*", "/"]: #IntType() or FloatType()
+            if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return IntegerType()
+            elif type(left_typ) is FloatType:
+                if type(right_typ) is not IntegerType and type(right_typ) is not FloatType:
+                    raise TypeMismatchInExpression(ast)
+                return FloatType()
+            elif type(right_typ) is FloatType:
+                if type(left_typ) is not IntegerType and type(left_typ) is not FloatType:
+                    raise TypeMismatchInExpression(ast)
+                return FloatType()
+            raise TypeMismatchInExpression(ast)
+        
+        if op in ["%"]:
+            if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return IntegerType()
+            raise TypeMismatchInExpression(ast)
+        
+        if op in ["&&", "||"]:
+            if type(left_typ) is BooleanType and type(right_typ) is BooleanType:
+                return BooleanType()
+            raise TypeMismatchInExpression(ast)
+        
+        if op in ["::"]:
+            if type(left_typ) is StringType and type(right_typ) is StringType:
+                return StringType()
+            raise TypeMismatchInExpression(ast)
+        
+        if op in ["==", "!="]:
+            # bool == bool / bool == int
+            if type(left_typ) is BooleanType:
+                if type(right_typ) is IntegerType or type(right_typ) is BooleanType:
+                    return BooleanType()
+                raise TypeMismatchInExpression(ast)
 
+            # bool == bool / int == bool
+            if type(right_typ) is BooleanType:
+                if type(left_typ) is IntegerType or type(left_typ) is BooleanType:
+                    return BooleanType()                
+                raise TypeMismatchInExpression(ast)
+            
+            # int == int
+            if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return BooleanType()
 
-    def visitUnExpr(self, ast, o): pass
-    def visitId(self, ast, o): pass
+            raise TypeMismatchInExpression(ast)
+    
+        if op in ["<", ">", "<=", ">="]:
+            # int > int / int > float
+            if type(left_typ) is IntegerType:
+                if type(right_typ) is IntegerType or type(right_typ) is FloatType:
+                    return BooleanType()
+                raise TypeMismatchInExpression(ast)
+            
+            # int < int / float < int
+            if type(right_typ) is IntegerType:
+                if type(left_typ) is IntegerType or type(left_typ) is FloatType:
+                    return BooleanType()
+                raise TypeMismatchInExpression(ast)
+            
+            # float < float
+            if type(left_typ) is FloatType and type(right_typ) is FloatType:
+                return BooleanType()
+            
+            raise TypeMismatchInExpression(ast)
+
+    # op: str,  val: Expr
+    def visitUnExpr(self, ast: UnExpr, o):
+        val_typ = self.visit(ast.val, o) #Type()
+        op = ast.op
+
+        if op in ["-"]:
+            if type(val_typ) is IntegerType:
+                return IntegerType
+            if type(val_typ) is FloatType:
+                return FloatType
+            raise TypeMismatchInExpression(ast)
+        
+        if op in ["!"]:
+            if type(val_typ) is BooleanType:
+                return BooleanType
+            raise TypeMismatchInExpression(ast)
+                
+
+    def visitId(self, ast: Id, o): 
+        pass
+
     def visitArrayCell(self, ast, o): pass
     def visitFuncCall(self, ast, o): pass
 
@@ -74,7 +161,7 @@ class StaticChecker(Visitor):
     def visitReturnStmt(self, ast, o): pass
     def visitCallStmt(self, ast, o): pass
 
-    def _check_typeMismatch(var_type, init_type):
+    def _check_Float_Int_coersion(var_type, init_type):
         if type(var_type) is FloatType and type(init_type) is IntegerType:
             return True
         elif type(var_type) is not type(init_type): 
@@ -95,8 +182,16 @@ class StaticChecker(Visitor):
         # checkType Mismatch______________
         if ast.init is not None:
             init_typ = self.visit(ast.init, o) # Type()
-            if not StaticChecker._check_typeMismatch(ast.typ, init_typ):
-                raise TypeMismatchInVarDecl(ast)                    
+            # print(ast.name,": ",type(ast.typ) is AutoType)
+            if type(ast.typ) is AutoType:
+                print("before: ",ast.name,": ", ast.typ)
+                # StaticChecker._inferType(o, ast.name, init_typ)
+                ast.typ = init_typ
+                print("after: ", ast.name,": ", ast.typ)
+            elif not StaticChecker._check_Float_Int_coersion(ast.typ, init_typ):
+                raise TypeMismatchInVarDecl(ast)      
+        elif type(ast.typ) is AutoType:
+            raise Invalid(Variable(), ast.name)
 
         o[0][ast.name] = ast.typ
 

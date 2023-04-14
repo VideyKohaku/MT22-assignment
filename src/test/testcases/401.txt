@@ -1,3 +1,5 @@
 
-        a: integer = true;
+        c: auto = 1;
+        d: auto = true;
+        a: integer = c + d;
         a: float = 1.0;

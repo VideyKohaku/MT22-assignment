@@ -1,1 +1,5 @@
-x: integer;
+
+            main: function void (){
+                arr = b[1,2];
+            }
+        
