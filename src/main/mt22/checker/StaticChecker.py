@@ -35,7 +35,7 @@ class StaticChecker(Visitor):
     def visitBooleanType(self, ast: BooleanType, o):
         return BooleanType()
 
-    # dimensions: List[int], typ: atomicTyp
+    # dimensions: List[int], typ: atomicType
     def visitArrayType(self, ast, o):
         pass
 
@@ -53,8 +53,20 @@ class StaticChecker(Visitor):
 
     # explist: List[Expr]
     def visitArrayLit(self, ast: ArrayLit, o):
-        for expr in ast.explist:
-            exp_type =  self.visit()
+        first_typ = self.visit(ast.explist[0])
+
+        for exp in ast.explist[1:]:
+            exp_typ = self.visit(exp, o)
+            if type(exp_typ) is AutoType and type(first_typ) is not AutoType:
+                StaticChecker._inferType(o, exp.name, first_typ)
+            elif type(first_typ) is not AutoType and type(first_typ) is not type(exp_typ):
+                raise IllegalArrayLiteral(ast)
+
+        if type(first_typ) is AutoType:
+            for scope in o:
+                if ast.name in scope:
+                    pass
+
 
     def visitAutoType(self, ast, o):
         return AutoType()
@@ -71,65 +83,79 @@ class StaticChecker(Visitor):
         if op in ["+", "-", "*", "/"]: #IntType() or FloatType()
             if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
                 return IntegerType()
-            elif type(left_typ) is FloatType:
-                if type(right_typ) is not IntegerType and type(right_typ) is not FloatType:
-                    raise TypeMismatchInExpression(ast)
+            if type(left_typ) is FloatType and type(right_typ) in [FloatType, IntegerType]:
                 return FloatType()
-            elif type(right_typ) is FloatType:
-                if type(left_typ) is not IntegerType and type(left_typ) is not FloatType:
-                    raise TypeMismatchInExpression(ast)
+            if type(right_typ) is FloatType and type(left_typ) in [FloatType, IntegerType]:
                 return FloatType()
+            if type(left_typ) is AutoType and type(right_typ) in [FloatType, IntegerType]:
+                StaticChecker._inferType(o, ast.left.name, right_typ) 
+                return right_typ
+            if type(right_typ) is AutoType and type(left_typ) in [FloatType, IntegerType]:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
+                return left_typ
             raise TypeMismatchInExpression(ast)
         
         if op in ["%"]:
             if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return IntegerType()
+            if type(left_typ) is AutoType and type(right_typ) is IntegerType:
+                StaticChecker._inferType(o, ast.left.name, right_typ)
+                return IntegerType()
+            if type(right_typ) is AutoType and type(left_typ) is IntegerType:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
                 return IntegerType()
             raise TypeMismatchInExpression(ast)
         
         if op in ["&&", "||"]:
             if type(left_typ) is BooleanType and type(right_typ) is BooleanType:
                 return BooleanType()
+            if type(left_typ) is AutoType and type(right_typ) is BooleanType:
+                StaticChecker._inferType(o, ast.left.name, right_typ)
+                return BooleanType()
+            if type(right_typ) is AutoType and type(left_typ) is BooleanType:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
+                return BooleanType()
             raise TypeMismatchInExpression(ast)
         
         if op in ["::"]:
             if type(left_typ) is StringType and type(right_typ) is StringType:
                 return StringType()
+            if type(left_typ) is AutoType and type(right_typ) is StringType:
+                StaticChecker._inferType(o, ast.left.name, right_typ)
+                return StringType()
+            if type(right_typ) is AutoType and type(left_typ) is StringType:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
+                return StringType()
             raise TypeMismatchInExpression(ast)
         
         if op in ["==", "!="]:
-            # bool == bool / bool == int
-            if type(left_typ) is BooleanType:
-                if type(right_typ) is IntegerType or type(right_typ) is BooleanType:
-                    return BooleanType()
-                raise TypeMismatchInExpression(ast)
-
-            # bool == bool / int == bool
-            if type(right_typ) is BooleanType:
-                if type(left_typ) is IntegerType or type(left_typ) is BooleanType:
-                    return BooleanType()                
-                raise TypeMismatchInExpression(ast)
-            
-            # int == int
             if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return BooleanType
+            if type(left_typ) is BooleanType and type(right_typ) in [BooleanType, IntegerType]:
                 return BooleanType()
-
+            if type(right_typ) is BooleanType and type(left_typ) in [BooleanType, IntegerType]:
+                return BooleanType()
+            if type(left_typ) is AutoType and type(right_typ) in [BooleanType, IntegerType]:
+                StaticChecker._inferType(o, ast.left.name, right_typ)
+                return BooleanType()
+            if type(right_typ) is AutoType and type(left_typ) in [BooleanType, IntegerType]:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
+                return BooleanType()
             raise TypeMismatchInExpression(ast)
+
     
         if op in ["<", ">", "<=", ">="]:
-            # int > int / int > float
-            if type(left_typ) is IntegerType:
-                if type(right_typ) is IntegerType or type(right_typ) is FloatType:
-                    return BooleanType()
-                raise TypeMismatchInExpression(ast)
-            
-            # int < int / float < int
-            if type(right_typ) is IntegerType:
-                if type(left_typ) is IntegerType or type(left_typ) is FloatType:
-                    return BooleanType()
-                raise TypeMismatchInExpression(ast)
-            
-            # float < float
-            if type(left_typ) is FloatType and type(right_typ) is FloatType:
+            if type(left_typ) is IntegerType and type(right_typ) is IntegerType:
+                return BooleanType
+            if type(left_typ) is FloatType and type(right_typ) in [FloatType, IntegerType]:
+                return BooleanType()
+            if type(right_typ) is FloatType and type(left_typ) in [FloatType, IntegerType]:
+                return BooleanType()
+            if type(left_typ) is AutoType and type(right_typ) in [FloatType, IntegerType]:
+                StaticChecker._inferType(o, ast.left.name, right_typ)
+                return BooleanType()
+            if type(right_typ) is AutoType and type(left_typ) in [FloatType, IntegerType]:
+                StaticChecker._inferType(o, ast.right.name, left_typ)
                 return BooleanType()
             
             raise TypeMismatchInExpression(ast)
@@ -231,10 +257,11 @@ class StaticChecker(Visitor):
     def visitDoWhileStmt(self, ast: DoWhileStmt, o):
         StaticChecker._add_loop_stack()
 
+        self.visit(ast.stmt, o)
+
         cond_typ = self.visit(ast.cond, o)
         if type(cond_typ) is not BooleanType:
             raise TypeMismatchInStatement(ast)
-        self.visit(ast.stmt)
 
         StaticChecker._pop_loop_stack()
 
@@ -260,8 +287,9 @@ class StaticChecker(Visitor):
     def visitVarDecl(self, ast: VarDecl, o):
         # check duplicated name___________
         if ast.name in o[0]:
-            # print("visitVarDecl scope: ", o[0])
             raise Redeclared(Variable(), ast.name)                 
+        
+        o[0][ast.name] = ast.typ
              
         # checkType Mismatch______________
         if ast.init is not None:
@@ -274,8 +302,8 @@ class StaticChecker(Visitor):
                 raise TypeMismatchInVarDecl(ast)      
         elif type(ast.typ) is AutoType:
             raise Invalid(Variable(), ast.name)
-
-        o[0][ast.name] = ast.typ
+        
+        print(ast.name,": ", ast.typ)
 
 
     ### ParamDecl # name: str, typ: Type, out: bool = False, inherit: bool = False
@@ -289,7 +317,8 @@ class StaticChecker(Visitor):
     ### Program # decls: List[Decl]
     def visitProgram(self, ast: Program, o):
         o = [{}]
+
         for decl in ast.decls:
             self.visit(decl, o)
-        return []
+        return o
 

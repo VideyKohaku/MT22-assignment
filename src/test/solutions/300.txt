@@ -1,3 +1,6 @@
 Program([
-	FuncDecl(main, VoidType, [], None, BlockStmt([AssignStmt(Id(arr), ArrayCell(b, [IntegerLit(1), IntegerLit(2)])), VarDecl(ab, IntegerType)]))
+	FuncDecl(foo, AutoType, [], None, BlockStmt([]))
+	FuncDecl(boo, AutoType, [], None, BlockStmt([]))
+	FuncDecl(goo, AutoType, [], None, BlockStmt([]))
+	VarDecl(a, ArrayType([3], IntegerType), ArrayLit([FuncCall(foo, []), FuncCall(boo, []), FuncCall(goo, [])]))
 ])

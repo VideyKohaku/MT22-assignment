@@ -58,13 +58,14 @@ class TypeMismatchInVarDecl(StaticError):
 
         def __str__(self):
             return f"Type mismatch in Variable Declaration: {str(self.decl)}"
-    
+
+
 class TypeMismatchInExpression(StaticError):
     def __init__(self, expr):
         self.expr = expr
 
     def __str__(self):
-        return f"Type mismatch in expression: {str(self.expr)}"
+        return "Type mismatch in expression: {}".format(str(self.expr) if self.expr else "")
 
 
 class TypeMismatchInStatement(StaticError):

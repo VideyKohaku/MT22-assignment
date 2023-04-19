@@ -38,14 +38,9 @@ class CheckerSuite(unittest.TestCase):
 
     def test_simple_decl_405(self):
         input = """
-        main: function void(){
-            a: integer;
-            for (a = 1, a < 12, a+1){
-                b = 2;
-            }
-            break;
-        }
+        a: auto = a + 1;
+        f: string = a;
         """
-        expect = "Invalid Variable: c"
+        expect = "Type mismatch in Variable Declaration: VarDecl(f, StringType, Id(a))"
         self.assertTrue(TestChecker.test(input, expect, 405))
 

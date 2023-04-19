@@ -1,6 +1,6 @@
 
-            main: function void (){
-                arr = b[1,2];
-                ab: integer;
-            }
+           foo: function auto(){}
+	boo: function auto(){}
+	goo: function auto(){}
+	a: array [3] of integer = {foo(), boo(), goo()};
         

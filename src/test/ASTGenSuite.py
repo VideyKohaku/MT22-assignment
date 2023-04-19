@@ -6,10 +6,10 @@ from AST import *
 class ASTGenSuite(unittest.TestCase):
     def test_short_vardecl(self):
         input = """
-            main: function void (){
-                arr = b[1,2];
-                ab: integer;
-            }
+           foo: function auto(){}
+	boo: function auto(){}
+	goo: function auto(){}
+	a: array [3] of integer = {foo(), boo(), goo()};
         """
         expect = str(Program([VarDecl("x", IntegerType())]))
         self.assertTrue(TestAST.test(input, expect, 300))
@@ -46,9 +46,12 @@ class ASTGenSuite(unittest.TestCase):
 
     def test_more_complex_program(self):
         """More complex program"""
-        input = """main: function void () {
-            printInteger(4);
-        }"""
+        input = """
+        foo: function auto(){
+        
+        }
+        arr: array [3] of integer = {c,b,a};
+        """
         expect = """Program([
 	FuncDecl(main, VoidType, [], None, BlockStmt([]))
 ])"""
