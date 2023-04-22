@@ -47,10 +47,12 @@ class ASTGenSuite(unittest.TestCase):
     def test_more_complex_program(self):
         """More complex program"""
         input = """
-        foo: function auto(){
+        foo: function auto(a: integer, b: auto){
         
         }
-        arr: array [3] of integer = {c,b,a};
+        main: function void(){}
+        goo: function integer(inherit c: float, d: boolean) inherit foo{}
+        arr: array [3] of integer = {};
         """
         expect = """Program([
 	FuncDecl(main, VoidType, [], None, BlockStmt([]))

@@ -4,5 +4,4 @@
         }
         main: function void(){}
         goo: function integer(inherit c: float, d: boolean) inherit foo{}
-        arr: array [3] of integer = {};
         

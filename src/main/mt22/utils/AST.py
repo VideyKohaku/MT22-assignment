@@ -62,6 +62,8 @@ class ArrayType(Type):
     def __str__(self):
         return "ArrayType([{}], {})".format(", ".join([str(dimen) for dimen in self.dimensions]), str(self.typ))
 
+    def __repr__(self):
+        return "ArrayType([{}], {})".format(", ".join([str(dimen) for dimen in self.dimensions]), str(self.typ))
 
 class AutoType(Type):
     def __str__(self):
@@ -103,6 +105,9 @@ class Id(LHS):
         self.name = name
 
     def __str__(self):
+        return "Id({})".format(self.name)
+    
+    def __repr__(self) -> str:
         return "Id({})".format(self.name)
 
 
@@ -154,6 +159,8 @@ class ArrayLit(Expr):
     def __str__(self):
         return "ArrayLit([{}])".format(", ".join([str(exp) for exp in self.explist]))
 
+    def __repr__(self):
+        return "ArrayLit([{}])".format(", ".join([str(exp) for exp in self.explist]))
 
 class FuncCall(Expr):
     def __init__(self, name: str, args: List[Expr]):
@@ -284,9 +291,10 @@ class FuncDecl(Decl):
     def __str__(self):
         return "FuncDecl({}, {}, [{}], {}, {})".format(self.name, str(self.return_type), ", ".join([str(param) for param in self.params]), self.inherit if self.inherit else "None", str(self.body))
 
+    def __repr__(self) -> str:
+        return "FuncDecl({}, {}, [{}], {}, {})".format(self.name, str(self.return_type), ", ".join([str(param) for param in self.params]), self.inherit if self.inherit else "None", str(self.body))
+
 # Program
-
-
 class Program(AST):
     def __init__(self, decls: List[Decl]):
         self.decls = decls

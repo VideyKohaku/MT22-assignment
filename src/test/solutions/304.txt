@@ -1,4 +1,6 @@
 Program([
-	FuncDecl(foo, AutoType, [], None, BlockStmt([]))
-	VarDecl(arr, ArrayType([3], IntegerType), ArrayLit([Id(c), Id(b), Id(a)]))
+	FuncDecl(foo, AutoType, [Param(a, IntegerType), Param(b, AutoType)], None, BlockStmt([]))
+	FuncDecl(main, VoidType, [], None, BlockStmt([]))
+	FuncDecl(goo, IntegerType, [InheritParam(c, FloatType), Param(d, BooleanType)], foo, BlockStmt([]))
+	VarDecl(arr, ArrayType([3], IntegerType), ArrayLit([]))
 ])

@@ -1,0 +1,6 @@
+
+        main: function auto(){}
+        a: function auto(anArg: auto){}
+        b: boolean = true;
+        arr: array [4] of float = {{1,2,3}, {2,a, main}};
+        
