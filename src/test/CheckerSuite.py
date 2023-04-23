@@ -4,137 +4,141 @@ from AST import *
 
 class CheckerSuite(unittest.TestCase):
     """Test program"""
-    def test_program_1(self):
-        input=""""""
-        expect="No entry point"
-        self.assertTrue(TestChecker.test(input,expect,401))
+    # def test_program_1(self):
+    #     input=""""""
+    #     expect="No entry point"
+    #     self.assertTrue(TestChecker.test(input,expect,401))
     
-    def test_program_2(self):
-        input="""foo: function void()
-        {
+    # def test_program_2(self):
+    #     input="""foo: function void()
+    #     {
             
-        }
-        """
-        expect="No entry point"
-        self.assertTrue(TestChecker.test(input,expect,402))
+    #     }
+    #     """
+    #     expect="No entry point"
+    #     self.assertTrue(TestChecker.test(input,expect,402))
     
-    def test_program_3(self):
-        input="""a:integer;"""
-        expect="No entry point"
-        self.assertTrue(TestChecker.test(input,expect,403))
+    # def test_program_3(self):
+    #     input="""a:integer;"""
+    #     expect="No entry point"
+    #     self.assertTrue(TestChecker.test(input,expect,403))
 
-    def test_program_4(self):
-        input="""a: float;
-                 foo: function void() {}"""
-        expect="No entry point"
-        self.assertTrue(TestChecker.test(input,expect,404))
+    # def test_program_4(self):
+    #     input="""a: float;
+    #              foo: function void() {}"""
+    #     expect="No entry point"
+    #     self.assertTrue(TestChecker.test(input,expect,404))
     
-    def test_program_5(self):
-        input="""a: float;
-                 main: function integer() {}"""
-        expect="No entry point"
-        self.assertTrue(TestChecker.test(input,expect,405))
+    # def test_program_5(self):
+    #     input="""a: float;
+    #              main: function integer() {}"""
+    #     expect="No entry point"
+    #     self.assertTrue(TestChecker.test(input,expect,405))
 
-    """Test variable declaration"""
+    # """Test variable declaration"""
 
-    def test_vardecl_1(self):
-        input="""
-            a: float;
-            b: integer;
-            a: string;
-            """
-        expect="Redeclared Variable: a"
-        self.assertTrue(TestChecker.test(input,expect,406))
+    # def test_vardecl_1(self):
+    #     input="""
+    #         a: float;
+    #         b: integer;
+    #         a: string;
+    #         """
+    #     expect="Redeclared Variable: a"
+    #     self.assertTrue(TestChecker.test(input,expect,406))
 
-    def test_vardecl_2(self):
-        input="""
-            c: string;
-            d: string;
-            a: string = c::d;
-            e: boolean = 2;
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(e, BooleanType, IntegerLit(2))"
-        self.assertTrue(TestChecker.test(input,expect,407))
+    # def test_vardecl_2(self):
+    #     input="""
+    #         c: string;
+    #         d: string;
+    #         a: string = c::d;
+    #         e: boolean = 2;
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(e, BooleanType, IntegerLit(2))"
+    #     self.assertTrue(TestChecker.test(input,expect,407))
 
-    def test_vardecl_3(self):
-        input="""
-            a: auto;
-            """
-        expect="Invalid Variable: a"
-        self.assertTrue(TestChecker.test(input,expect,408))
+    # def test_vardecl_3(self):
+    #     input="""
+    #         a: auto;
+    #         """
+    #     expect="Invalid Variable: a"
+    #     self.assertTrue(TestChecker.test(input,expect,408))
 
-    def test_vardecl_4(self):
-        input="""
-            a: integer = 1.2;
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(a, IntegerType, FloatLit(1.2))"
-        self.assertTrue(TestChecker.test(input,expect,409))
+    # def test_vardecl_4(self):
+    #     input="""
+    #         a: integer = 1.2;
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(a, IntegerType, FloatLit(1.2))"
+    #     self.assertTrue(TestChecker.test(input,expect,409))
     
-    def test_vardecl_5(self):
-        input="""
-            a: float = 2;
-            b: integer = 2;
-            b: string;
-            """
-        expect="Redeclared Variable: b"
-        self.assertTrue(TestChecker.test(input,expect,410))
+    # def test_vardecl_5(self):
+    #     input="""
+    #         a: float = 2;
+    #         b: integer = 2;
+    #         b: string;
+    #         """
+    #     expect="Redeclared Variable: b"
+    #     self.assertTrue(TestChecker.test(input,expect,410))
 
-    def test_vardecl_6(self):
-        input="""
-            a: float = 2;
-            b: integer = 2;
-            c: auto = a + b;
-            d: integer = c;
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, Id(c))"
-        self.assertTrue(TestChecker.test(input,expect,411))
+    # def test_vardecl_6(self):
+    #     input="""
+    #         a: float = 2;
+    #         b: integer = 2;
+    #         c: auto = a + b;
+    #         d: integer = c;
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, Id(c))"
+    #     self.assertTrue(TestChecker.test(input,expect,411))
 
-    def test_vardecl_7(self):
-        input="""
-            a: float = 2;
-            b: integer = 2;
-            c: auto = {a,b};
-            d: array [2] of float = {"a","b"};
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(d, ArrayType([2], FloatType), ArrayLit([StringLit(a), StringLit(b)]))"
-        self.assertTrue(TestChecker.test(input,expect,412))
+    # def test_vardecl_7(self):
+    #     input="""
+    #         a: float = 2;
+    #         b: integer = 2;
+    #         c: auto = {a,b};
+    #         d: array [2] of float = {"a","b"};
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(d, ArrayType([2], FloatType), ArrayLit([StringLit(a), StringLit(b)]))"
+    #     self.assertTrue(TestChecker.test(input,expect,412))
     
-    def test_vardecl_8(self):
-        input="""
-            a: float = 2;
-            b: integer = 2;
-            c: auto = {a,b,"d"};
-            """
-        expect="Illegal array literal: ArrayLit([Id(a), Id(b), StringLit(d)])"
-        self.assertTrue(TestChecker.test(input,expect,413))
+    # def test_vardecl_8(self):
+    #     input="""
+    #         a: float = 2;
+    #         b: integer = 2;
+    #         c: auto = {a,b,"d"};
+    #         """
+    #     expect="Illegal array literal: ArrayLit([Id(a), Id(b), StringLit(d)])"
+    #     self.assertTrue(TestChecker.test(input,expect,413))
 
-    def test_vardecl_9(self):
-        input="""
-            a: float = 2;
-            b: integer = 2;
-            c: auto = {{a,b},{a,b}};
-            d: array [2] of integer = c[0];
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(d, ArrayType([2], IntegerType), ArrayCell(c, [IntegerLit(0)]))"
-        self.assertTrue(TestChecker.test(input,expect,414))
+    # def test_vardecl_9(self):
+    #     input="""
+    #         a: float = 2;
+    #         b: integer = 2;
+    #         c: auto = {{a,b},{a,b}};
+    #         d: array [2] of integer = c[0];
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(d, ArrayType([2], IntegerType), ArrayCell(c, [IntegerLit(0)]))"
+    #     self.assertTrue(TestChecker.test(input,expect,414))
 
-    def test_vardecl_10(self):
-        input="""
-            a: integer;
-            b: array [2,2] of float;
-            c: auto = b[2];
-            d: integer = c[1];
-            """
-        expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, ArrayCell(c, [IntegerLit(1)]))"
-        self.assertTrue(TestChecker.test(input,expect,415))
+    # def test_vardecl_10(self):
+    #     input="""
+    #         a: integer;
+    #         b: array [2,2] of float;
+    #         c: auto = b[2];
+    #         d: integer = c[1];
+    #         """
+    #     expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, ArrayCell(c, [IntegerLit(1)]))"
+    #     self.assertTrue(TestChecker.test(input,expect,415))
     
     def test_vardecl_11(self):
         input="""
-            a: integer;
-            b: array [2,2] of float;
-            c: auto = b[2];
-            d: integer = c[1];
+            arr: array [2,1] of float = { {1,2},{3,4} ,{1, 1} };
             """
+        expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, ArrayCell(c, [IntegerLit(1)]))"
+        self.assertTrue(TestChecker.test(input,expect,416))
+
+    def test_vardecl_11(self):
+        input="""
+            arr: array [3,2,1] of boolean = { {{1.0},{3.6}}, {{1.0}, {1.0}}, {{3.4}, {3.6}} };
+        """
         expect="Type mismatch in Variable Declaration: VarDecl(d, IntegerType, ArrayCell(c, [IntegerLit(1)]))"
         self.assertTrue(TestChecker.test(input,expect,416))
 

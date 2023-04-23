@@ -1,7 +1,3 @@
 
-            a: function integer(b: integer, c:integer) inherit d {}
-            main: function void()
-            {
-            
-            }
-            
+            arr: array [3,2,1] of boolean = { {{1.0},{3.6}}, {{1.0}, {1.0}}, {{3.4}, {3.6}} };
+        
