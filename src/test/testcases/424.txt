@@ -1,0 +1,6 @@
+
+            bar : function void (a:float) inherit foo{
+                super();
+            } 
+            foo : function auto (){} 
+            

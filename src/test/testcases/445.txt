@@ -1,0 +1,8 @@
+
+            foo: function integer (a: auto, b: auto)
+            {
+                c: integer = a;
+                b = a + 1.0;
+                printInteger(a);
+            }
+            

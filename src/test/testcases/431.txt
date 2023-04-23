@@ -1,0 +1,15 @@
+
+            bar: integer;
+            foo: function integer (a: integer, b: auto) inherit bar 
+            {
+                preventDefault();
+                if (a==1)
+                {
+                    b: integer;
+                }
+            }
+            bar: function integer(inherit c: integer)
+            {
+            
+            }
+            

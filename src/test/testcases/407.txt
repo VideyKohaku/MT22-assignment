@@ -1,7 +1,6 @@
 
-        foo: function auto(a: integer, b: auto){
-        
-        }
-        main: function void(){}
-        goo: function integer(inherit c: float, d: boolean) inherit foo{}
-        
+            c: string;
+            d: string;
+            a: string = c::d;
+            e: boolean = 2;
+            

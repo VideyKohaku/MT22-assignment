@@ -1,0 +1,7 @@
+
+            a: function integer(b: integer, c:integer) inherit d {}
+            main: function void()
+            {
+            
+            }
+            

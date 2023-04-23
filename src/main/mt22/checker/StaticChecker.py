@@ -9,7 +9,7 @@ class StaticChecker(Visitor):
     def __init__(self, ast):
         self.ast = ast
         self.loop_stack = []
-        self.array_dimension_stack = []
+        self.first_array_lit = []
 
     def check(self):
         return self.visit(self.ast, [])
@@ -25,9 +25,25 @@ class StaticChecker(Visitor):
                 scope[name] = typ
                 return typ
     
+    @staticmethod
+    def _set_first_arrayLit(self, ast):
+        if not len(self.first_array_lit):
+            self.first_array_lit += [ast]
+
+    @staticmethod
+    def _get_first_arrayLit(self):
+        if len(self.first_array_lit):
+            return self.first_array_lit[0]
+
+    @staticmethod
+    def _reset_first_arrayLit(self):
+        self.first_array_lit = []
+
+    @staticmethod
     def _add_loop_stack(self):
         self.loop_stack += [1]
 
+    @staticmethod
     def _pop_loop_stack(self):
         stack_len = len(self.loop_stack)
         self.loop_stack = self.loop_stack[:stack_len - 1]
@@ -63,6 +79,10 @@ class StaticChecker(Visitor):
     # explist: List[Expr]
     # env
     def visitArrayLit(self, ast: ArrayLit, o): 
+        ### Store first arrayLit
+        print("ast: \n", ast)
+        StaticChecker._set_first_arrayLit(self, ast)
+
         if (not len(ast.explist)):
             return None
 
@@ -70,20 +90,15 @@ class StaticChecker(Visitor):
         exp_list = ast.explist
         exp_typ_list = list(map(lambda exp: self.visit(exp, o), exp_list))
         print("exp typ list:\n", exp_typ_list)
-
-        ## Check if it has array type in list
         
-
 
         common_typ_list = {type(exp_typ) if type(exp_typ) is not FuncDecl else type(exp_typ.return_type)  for exp_typ in exp_typ_list}
         # print("common_types: ", common_typ_list)
         common_typ = None
 
         # 1 - Dimension Array: Auto - Int - Float
-        if len(common_typ_list) > 3:
-            raise IllegalArrayLiteral(ast)
-        elif len(common_typ_list) == 3:
-            common_typ = FloatType
+        if len(common_typ_list) >= 3:
+            raise IllegalArrayLiteral(StaticChecker._get_first_arrayLit())
         elif len(common_typ_list) == 2:
             if AutoType in common_typ_list:
                 common_typ_list.remove(AutoType)
@@ -97,11 +112,8 @@ class StaticChecker(Visitor):
                     if type(exp) is FuncDecl and type(exp.return_type) is AutoType:
                         StaticChecker._inferType(o, exp.name, common_typ())
                 # print("o after infer: \n", o)
-
-            elif FloatType in common_typ_list and IntegerType in common_typ_list:
-                common_typ = FloatType
             else:
-                raise IllegalArrayLiteral(ast)
+                raise IllegalArrayLiteral(StaticChecker._get_first_arrayLit())
         else:
             common_typ_it = iter(common_typ_list)
             common_typ = next(common_typ_it)
@@ -112,6 +124,8 @@ class StaticChecker(Visitor):
         dimensions = Utils.getArrayDimensions(ast)
         print("dimension:\n", dimensions)        
 
+        ### Reset first Array to None
+        StaticChecker._reset_first_arrayLit()
         return ArrayType(dimensions, common_typ)
 
 
@@ -381,11 +395,17 @@ class StaticChecker(Visitor):
         o = firstchecker.check()
         # Utils.printEnvironment(o)
         # print("ast: ",o)
-
+        
         for decl in ast.decls:
             self.visit(decl, o)
+
+        ### NO ENTRY POINT
+        if Utils.isNoEntryPoint(o, "main"):
+            raise NoEntryPoint()
+        
         return o
 
+    
 
 
 
@@ -494,3 +514,9 @@ class Utils:
         dimensions = [len(ast.explist)] + first_exp_dims
         # print("utils:\n", dimensions)
         return dimensions
+    
+    def isNoEntryPoint(env, name):
+        for scope in env:
+            if name in scope and type(scope[name]) is FuncDecl and not len(scope[name].params) and type(scope[name].return_type) is VoidType:
+                return False
+        return True

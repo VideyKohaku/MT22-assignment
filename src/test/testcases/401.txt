@@ -1,3 +1,0 @@
-
-        a: integer = 1;
-        a: float = 1.0;

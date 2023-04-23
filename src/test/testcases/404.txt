@@ -1,5 +1,2 @@
-
-        c: auto;
-        d: auto = true;
-        a: integer = c + d;
-        a: float = 1.0;
+a: float;
+                 foo: function void() {}

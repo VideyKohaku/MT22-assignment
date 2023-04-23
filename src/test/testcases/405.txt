@@ -1,4 +1,2 @@
-
-        a: auto = a + 1;
-        f: string = a;
-        
+a: float;
+                 main: function integer() {}

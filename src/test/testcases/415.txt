@@ -1,0 +1,6 @@
+
+            a: integer;
+            b: array [2,2] of float;
+            c: auto = b[2];
+            d: integer = c[1];
+            

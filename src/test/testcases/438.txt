@@ -1,0 +1,9 @@
+
+            foo: function integer (a: boolean, b: auto)
+            {
+                if ((a==1) && (b=="a"))
+                {
+                
+                }
+            }
+            

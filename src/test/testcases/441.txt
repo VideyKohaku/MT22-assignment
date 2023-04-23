@@ -1,0 +1,6 @@
+
+            foo: function integer (a: boolean, b: auto)
+            {
+                b = 1 + a;
+            }
+            

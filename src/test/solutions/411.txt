@@ -1,0 +1,1 @@
+Type mismatch in Variable Declaration: VarDecl(d, IntegerType, Id(c))

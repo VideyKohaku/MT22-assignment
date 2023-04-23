@@ -1,0 +1,6 @@
+
+            a: float = 2;
+            b: integer = 2;
+            c: auto = {{a,b},{a,b}};
+            d: array [2] of integer = c[0];
+            

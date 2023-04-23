@@ -1,0 +1,8 @@
+
+            a: integer;
+            a: function integer(b: integer, c:integer){}
+            main: function void()
+            {
+            
+            }
+            

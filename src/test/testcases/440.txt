@@ -1,0 +1,16 @@
+
+            foo: function integer (a: boolean, b: auto)
+            {
+                if ((1!=true) && (b==a))
+                {
+                
+                }
+                else
+                {
+                    if (b<2)
+                    {
+                    
+                    }
+                }
+            }
+            

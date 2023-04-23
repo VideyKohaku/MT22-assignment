@@ -1,0 +1,6 @@
+
+            bar : function void (a:float) inherit foo{
+                preventDefault();
+            } 
+            foo : function auto (){} 
+            

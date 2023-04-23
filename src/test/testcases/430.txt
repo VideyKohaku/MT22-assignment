@@ -1,0 +1,14 @@
+
+            foo: function integer (a: integer, b: auto) inherit bar 
+            {
+                preventDefault();
+                if (a==1)
+                {
+                    b: integer;
+                    b = 1 + foo(1,2);
+                    foo(1,2)
+                }
+                b=1.3;
+            }
+
+            

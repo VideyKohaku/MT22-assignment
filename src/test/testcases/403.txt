@@ -1,8 +1,1 @@
-
-        c: auto = 1.0;
-        d: auto = true;
-        
-        a: integer = c + d;
-        
-        main: function void(){}
-        b: float = 1.0;
+a:integer;

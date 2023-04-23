@@ -1,0 +1,10 @@
+
+            foo: function integer (a: integer, b: auto)
+            {
+                preventDefault();
+                if (a==1)
+                {
+                    b: integer;
+                }
+            }
+            

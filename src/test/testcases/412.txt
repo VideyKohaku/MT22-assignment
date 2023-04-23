@@ -1,0 +1,6 @@
+
+            a: float = 2;
+            b: integer = 2;
+            c: auto = {a,b};
+            d: array [2] of float = {"a","b"};
+            
